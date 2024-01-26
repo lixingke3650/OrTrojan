@@ -71,18 +71,6 @@ public:
         bool fast_open;
         int fast_open_qlen;
     } tcp;
-    class MySQLConfig {
-    public:
-        bool enabled;
-        std::string server_addr;
-        uint16_t server_port;
-        std::string database;
-        std::string username;
-        std::string password;
-        std::string key;
-        std::string cert;
-        std::string ca;
-    } mysql;
     void load(const std::string &filename);
     void populate(const std::string &JSON);
     bool sip003();

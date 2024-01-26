@@ -22,7 +22,6 @@
 
 #include "session.h"
 #include <boost/asio/ssl.hpp>
-#include "core/authenticator.h"
 
 class ServerSession : public Session {
 private:
@@ -35,7 +34,6 @@ private:
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket>in_socket;
     boost::asio::ip::tcp::socket out_socket;
     boost::asio::ip::udp::resolver udp_resolver;
-    Authenticator *auth;
     std::string auth_password;
     const std::string &plain_http_response;
     void destroy();
@@ -52,7 +50,7 @@ private:
     void udp_recv(const std::string &data, const boost::asio::ip::udp::endpoint &endpoint);
     void udp_sent();
 public:
-    ServerSession(const Config &config, boost::asio::io_context &io_context, boost::asio::ssl::context &ssl_context, Authenticator *auth, const std::string &plain_http_response);
+    ServerSession(const Config &config, boost::asio::io_context &io_context, boost::asio::ssl::context &ssl_context, const std::string &plain_http_response);
     boost::asio::ip::tcp::socket& accept_socket() override;
     void start() override;
 };

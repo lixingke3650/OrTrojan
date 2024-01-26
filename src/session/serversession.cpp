@@ -24,13 +24,12 @@ using namespace std;
 using namespace boost::asio::ip;
 using namespace boost::asio::ssl;
 
-ServerSession::ServerSession(const Config &config, boost::asio::io_context &io_context, context &ssl_context, Authenticator *auth, const string &plain_http_response) :
+ServerSession::ServerSession(const Config &config, boost::asio::io_context &io_context, context &ssl_context, const string &plain_http_response) :
     Session(config, io_context),
     status(HANDSHAKE),
     in_socket(io_context, ssl_context),
     out_socket(io_context),
     udp_resolver(io_context),
-    auth(auth),
     plain_http_response(plain_http_response) {}
 
 tcp::socket& ServerSession::accept_socket() {
@@ -140,11 +139,6 @@ void ServerSession::in_recv(const string &data) {
             auto password_iterator = config.password.find(req.password);
             if (password_iterator == config.password.end()) {
                 valid = false;
-                if (auth && auth->auth(req.password)) {
-                    valid = true;
-                    auth_password = req.password;
-                    Log::log_with_endpoint(in_endpoint, "authenticated by authenticator (" + req.password.substr(0, 7) + ')', Log::INFO);
-                }
             } else {
                 Log::log_with_endpoint(in_endpoint, "authenticated as " + password_iterator->second, Log::INFO);
             }
@@ -332,9 +326,6 @@ void ServerSession::destroy() {
     }
     status = DESTROY;
     Log::log_with_endpoint(in_endpoint, "disconnected, " + to_string(recv_len) + " bytes received, " + to_string(sent_len) + " bytes sent, lasted for " + to_string(time(nullptr) - start_time) + " seconds", Log::INFO);
-    if (auth && !auth_password.empty()) {
-        auth->record(auth_password, recv_len, sent_len);
-    }
     boost::system::error_code ec;
     resolver.cancel();
     udp_resolver.cancel();

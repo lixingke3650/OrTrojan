@@ -48,7 +48,6 @@ Service::Service(Config &config, bool test) :
     config(config),
     socket_acceptor(io_context),
     ssl_context(context::sslv23),
-    auth(nullptr),
     udp_socket(io_context) {
 #ifndef ENABLE_NAT
     if (config.run_type == Config::NAT) {
@@ -120,13 +119,6 @@ Service::Service(Config &config, bool test) :
             ssl_context.use_tmp_dh(boost::asio::const_buffer(SSLDefaults::g_dh2048_sz, SSLDefaults::g_dh2048_sz_size));
         } else {
             ssl_context.use_tmp_dh_file(config.ssl.dhparam);
-        }
-        if (config.mysql.enabled) {
-#ifdef ENABLE_MYSQL
-            auth = new Authenticator(config);
-#else // ENABLE_MYSQL
-            Log::log_with_date_time("MySQL is not supported", Log::WARN);
-#endif // ENABLE_MYSQL
         }
     } else {
         if (config.ssl.sni.empty()) {
@@ -309,7 +301,7 @@ void Service::stop() {
 void Service::async_accept() {
     shared_ptr<Session>session(nullptr);
     if (config.run_type == Config::SERVER) {
-        session = make_shared<ServerSession>(config, io_context, ssl_context, auth, plain_http_response);
+        session = make_shared<ServerSession>(config, io_context, ssl_context, plain_http_response);
     } else if (config.run_type == Config::FORWARD) {
         session = make_shared<ForwardSession>(config, io_context, ssl_context);
     } else if (config.run_type == Config::NAT) {
@@ -392,8 +384,4 @@ void Service::reload_cert() {
 }
 
 Service::~Service() {
-    if (auth) {
-        delete auth;
-        auth = nullptr;
-    }
 }

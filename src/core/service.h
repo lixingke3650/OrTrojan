@@ -25,7 +25,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/ip/udp.hpp>
-#include "authenticator.h"
+
 #include "session/udpforwardsession.h"
 
 class Service {
@@ -37,7 +37,6 @@ private:
     boost::asio::io_context io_context;
     boost::asio::ip::tcp::acceptor socket_acceptor;
     boost::asio::ssl::context ssl_context;
-    Authenticator *auth;
     std::string plain_http_response;
     boost::asio::ip::udp::socket udp_socket;
     std::list<std::weak_ptr<UDPForwardSession> > udp_sessions;

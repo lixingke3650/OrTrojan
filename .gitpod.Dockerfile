@@ -8,5 +8,4 @@ RUN sudo apt-get update && \
         cmake \
         libboost-system-dev \
         libboost-program-options-dev \
-        libssl-dev \
-        default-libmysqlclient-dev
+        libssl-dev
